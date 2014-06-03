@@ -62,7 +62,10 @@ ClientList::ClientList() {
   insert_helper(ClientInfo::TYPE_AZUREUS, "LT", NULL, NULL, "libtorrent");
   insert_helper(ClientInfo::TYPE_AZUREUS, "lt", NULL, NULL, "libTorrent");
   insert_helper(ClientInfo::TYPE_AZUREUS, "UT", NULL, NULL, "uTorrent");
+  insert_helper(ClientInfo::TYPE_AZUREUS, "UM", NULL, NULL, "uTorrent Mac");
+  insert_helper(ClientInfo::TYPE_AZUREUS, "UE", NULL, NULL, "uTorrent Embedded");
 
+  insert_helper(ClientInfo::TYPE_AZUREUS, "BT", NULL, NULL, "Mainline");
   insert_helper(ClientInfo::TYPE_MAINLINE, "M", NULL, NULL, "Mainline");
 
   insert_helper(ClientInfo::TYPE_COMPACT, "T", NULL, NULL, "BitTornado");
@@ -171,8 +174,18 @@ ClientList::retrieve_id(ClientInfo* dest, const HashString& id) const {
 
     dest->mutable_key()[0] = id[1];
     dest->mutable_key()[1] = id[2];
-    
+
     for (int i = 0; i < 4; i++)
+      dest->mutable_version()[i] = dest->mutable_upper_version()[i] = rak::hexchar_to_value(id[3 + i]);
+
+  } else if (id[0] == '-' && id[6] == '-' &&
+             std::isalpha(id[1]) && std::isalpha(id[2]) &&
+             std::isxdigit(id[3]) && std::isxdigit(id[4]) && std::isxdigit(id[5])) {
+    dest->set_type(ClientInfo::TYPE_AZUREUS);
+    dest->mutable_key()[0] = id[1];
+    dest->mutable_key()[1] = id[2];
+
+    for (int i = 0; i < 3; i++)
       dest->mutable_version()[i] = dest->mutable_upper_version()[i] = rak::hexchar_to_value(id[3 + i]);
 
   } else if (std::isalpha(id[0]) && id[4] == '-' &&
